@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zuid-Afrika Vakantieplanner</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { 
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+  background: #f5f5f5;
+  color: #333;
+}
+.container { max-width: 1200px; margin: 0 auto; }
+.header { 
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+  color: white; 
+  padding: 2rem 1.5rem;
+  text-align: center;
+}
+.header h1 { font-size: 32px; margin-bottom: 0.5rem; font-weight: 700; }
+.header p { font-size: 14px; opacity: 0.9; }
+
+.tabs { 
+  display: flex; 
+  gap: 0; 
+  background: white; 
+  border-bottom: 2px solid #e5e7eb;
+  padding: 0 1.5rem;
+  overflow-x: auto;
+}
+.tab { 
+  padding: 14px 20px; 
+  border: none; 
+  background: none; 
+  font-size: 14px; 
+  cursor: pointer; 
+  color: #666; 
+  border-bottom: 3px solid transparent;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.tab:hover { color: #1e3a8a; }
+.tab.active { 
+  color: #1e3a8a; 
+  border-bottom-color: #3b82f6;
+}
+
+.content { 
+  background: white;
+  padding: 2rem 1.5rem;
+  min-height: calc(100vh - 200px);
+}
+
+.section { display: none; }
+.section.active { display: block; }
+
+.day-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border-left: 4px solid #3b82f6;
+}
+
+.day-date {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1e3a8a;
+  margin-bottom: 0.25rem;
+}
+
+.day-weekday {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.event {
+  background: #f9fafb;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  border-left: 3px solid;
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.event.flight { border-left-color: #8b5cf6; }
+.event.accommodation { border-left-color: #10b981; }
+.event.restaurant { border-left-color: #f59e0b; }
+
+.event-icon {
+  font-size: 24px;
+  min-width: 30px;
+  text-align: center;
+}
+
+.event-content {
+  flex: 1;
+}
+
+.event-title {
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.25rem;
+}
+
+.event-time {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 0.25rem;
+}
+
+.event-details {
+  font-size: 13px;
+  color: #999;
+  margin-bottom: 0.5rem;
+}
+
+.guest-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 0.5rem;
+}
+
+.guest {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.no-events {
+  color: #ccc;
+  font-style: italic;
+  padding: 1rem;
+  text-align: center;
+}
+
+.card { 
+  background: white; 
+  border: 1px solid #e5e7eb; 
+  border-radius: 12px; 
+  padding: 1.5rem; 
+  margin-bottom: 1.5rem;
+}
+
+.form-group { margin-bottom: 1rem; }
+.form-label { 
+  display: block; 
+  font-size: 14px; 
+  font-weight: 600; 
+  margin-bottom: 0.5rem; 
+}
+
+input, textarea, select { 
+  width: 100%; 
+  padding: 10px 12px; 
+  border: 1px solid #e5e7eb; 
+  border-radius: 8px; 
+  font-size: 14px; 
+  font-family: inherit;
+}
+input:focus, textarea:focus { 
+  outline: none; 
+  border-color: #3b82f6; 
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+textarea { resize: vertical; min-height: 80px; }
+
+.btn {
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4); }
+.btn-small { padding: 8px 12px; font-size: 12px; }
+.btn-secondary { background: #f3f4f6; color: #1f2937; border: 1px solid #e5e7eb; }
+
+.restaurant-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.restaurant-title { font-size: 18px; font-weight: 700; margin-bottom: 0.5rem; }
+.restaurant-meta { font-size: 13px; color: #666; margin: 0.25rem 0; }
+
+.tag {
+  display: inline-block;
+  background: #dbeafe;
+  color: #1e40af;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
+.tag.lunch { background: #fef3c7; color: #92400e; }
+.tag.dinner { background: #dbeafe; color: #1e40af; }
+
+.packing-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+  border: 1px solid #e5e7eb;
+}
+.packing-item input { width: 20px; height: 20px; margin-right: 12px; }
+.packing-item.checked { background: #f0fdf4; }
+.packing-item.checked .packing-text { text-decoration: line-through; color: #999; }
+.packing-text { flex: 1; }
+.packing-delete { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 16px; }
+
+.flex-row { display: flex; gap: 8px; }
+.flex-row input { flex: 1; }
+
+.family-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+  margin-bottom: 2rem;
+}
+
+.family-btn {
+  padding: 12px;
+  border: 2px solid #ddd;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.family-btn.active {
+  border-color: #3b82f6;
+  background: #dbeafe;
+  color: #1e3a8a;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>🌍 Zuid-Afrika Vakantie Planner</h1>
+    <p>17 december 2026 - 2 januari 2027</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('daily')">📅 Dagelijks Overzicht</button>
+    <button class="tab" onclick="switchTab('restaurants')">🍽️ Restaurants & Wijnen</button>
+    <button class="tab" onclick="switchTab('packing')">🎒 Packing Lists</button>
+    <button class="tab" onclick="switchTab('notes')">📝 Notities</button>
+    <button class="tab" onclick="switchTab('sync')">🔄 Sync</button>
+  </div>
+
+  <div class="content">
+    <div id="daily" class="section active"></div>
+    <div id="restaurants" class="section"></div>
+    <div id="packing" class="section"></div>
+    <div id="notes" class="section"></div>
+    <div id="sync" class="section"></div>
+  </div>
+</div>
+
+<script>
+// Data
+let appData = {
+  restaurants: [],
+  packing: {},
+  notes: ''
+};
+
+const schedule = {
+  '2026-12-17': [
+    { type: 'flight', icon: '✈️', title: 'Vlucht naar Kaapstad', time: '17:15', location: 'Amsterdam → Kaapstad' }
+  ],
+  '2026-12-18': [
+    { type: 'flight', icon: '🛬', title: 'Aankomst Kaapstad', time: '05:45', location: 'Vliegveld' },
+    { type: 'accommodation', icon: '🏠', title: 'InAweStays Holiday Homes', location: 'Camp Street, Kaapstad', duration: '18-24 dec' }
+  ],
+  '2026-12-25': [
+    { type: 'accommodation', icon: '🦁', title: 'Safari Aquila Private Game Reserve', location: 'Game Reserve', duration: '25-26 dec' }
+  ],
+  '2026-12-26': [
+    { type: 'accommodation', icon: '🍇', title: 'Sunset Farm', location: 'Stellenbosch', duration: '26 dec - 1 jan' }
+  ],
+  '2027-01-02': [
+    { type: 'flight', icon: '✈️', title: 'Vlucht naar Nederland', time: '00:30', location: 'Kaapstad → Amsterdam' }
+  ]
+};
+
+const families = {
+  'liva-morris': 'Liva & Morris (Veerle & Jorik)',
+  'juul': 'Juul (Renske & Joost)',
+  'cor-irma': 'Cor & Irma',
+  'general': 'Algemeen'
+};
+
+let currentFamily = 'liva-morris';
+
+// Load data
+function loadData() {
+  const saved = localStorage.getItem('vakantiePlanner');
+  if (saved) {
+    appData = JSON.parse(saved);
+  }
+  // Initialize packing for all families
+  Object.keys(families).forEach(f => {
+    if (!appData.packing[f]) appData.packing[f] = [];
+  });
+}
+
+// Save data
+function saveData() {
+  localStorage.setItem('vakantiePlanner', JSON.stringify(appData));
+}
+
+// Tab switching
+function switchTab(tab) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(tab).classList.add('active');
+  event.target.classList.add('active');
+  
+  if (tab === 'daily') renderDaily();
+  if (tab === 'restaurants') renderRestaurants();
+  if (tab === 'packing') renderPacking();
+  if (tab === 'notes') renderNotes();
+  if (tab === 'sync') renderSync();
+}
+
+// DAILY
+function renderDaily() {
+  const container = document.getElementById('daily');
+  const dates = getDates();
+  
+  let html = '';
+  dates.forEach(date => {
+    html += `<div class="day-card">
+      <div class="day-date">${formatDate(date)}</div>
+      <div class="day-weekday">${getWeekday(date)}</div>
+      <div id="events-${date}"></div>
+    </div>`;
+  });
+  
+  container.innerHTML = html;
+  
+  // Populate events
+  dates.forEach(date => {
+    const eventsDiv = document.getElementById(`events-${date}`);
+    let eventsHtml = '';
+    
+    // Schedule events
+    if (schedule[date]) {
+      schedule[date].forEach(event => {
+        eventsHtml += renderEvent(event);
+      });
+    }
+    
+    // Restaurants
+    const rests = appData.restaurants.filter(r => r.date === date);
+    rests.forEach(r => {
+      eventsHtml += `<div class="event restaurant">
+        <div class="event-icon">${r.type === 'lunch' ? '🍽️' : '🌙'}</div>
+        <div class="event-content">
+          <div class="event-title">${r.name}</div>
+          <div class="event-details">📍 ${r.location}</div>
+          <div class="guest-list">${r.guests.map(g => `<span class="guest">${g}</span>`).join('')}</div>
+        </div>
+      </div>`;
+    });
+    
+    if (!eventsHtml) eventsHtml = '<div class="no-events">Geen activiteiten</div>';
+    eventsDiv.innerHTML = eventsHtml;
+  });
+}
+
+function renderEvent(event) {
+  return `<div class="event ${event.type}">
+    <div class="event-icon">${event.icon}</div>
+    <div class="event-content">
+      <div class="event-title">${event.title}</div>
+      ${event.time ? `<div class="event-time">⏰ ${event.time}</div>` : ''}
+      <div class="event-details">📍 ${event.location}</div>
+      ${event.duration ? `<div class="event-details">📅 ${event.duration}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+function getDates() {
+  const dates = [];
+  const start = new Date('2026-12-17');
+  const end = new Date('2027-01-02');
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    dates.push(d.toISOString().split('T')[0]);
+  }
+  return dates;
+}
+
+function getWeekday(dateStr) {
+  const days = ['Zondag', 'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag'];
+  const date = new Date(dateStr + 'T00:00:00');
+  return days[date.getDay()];
+}
+
+function formatDate(dateStr) {
+  const [year, month, day] = dateStr.split('-');
+  return `${day}/${month}/${year}`;
+}
+
+// RESTAURANTS
+function renderRestaurants() {
+  const container = document.getElementById('restaurants');
+  
+  const form = `
+    <div class="card">
+      <h2 style="margin-bottom: 1.5rem; font-size: 20px;">Nieuw restaurant/wijnhuis</h2>
+      <div class="form-group">
+        <label class="form-label">Naam</label>
+        <input type="text" id="restName" placeholder="Naam">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Type</label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <button class="btn btn-secondary" id="lunch-btn" onclick="selectMeal('lunch')" style="background: white; border: 2px solid #ddd; color: #333;">🍽️ Lunch</button>
+          <button class="btn btn-secondary" id="dinner-btn" onclick="selectMeal('dinner')" style="background: white; border: 2px solid #ddd; color: #333;">🌙 Dinner</button>
+        </div>
+        <input type="hidden" id="restType" value="lunch">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Datum</label>
+        <input type="date" id="restDate">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Locatie</label>
+        <input type="text" id="restLocation" placeholder="Adres">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Gezelschap</label>
+        <div class="flex-row">
+          <input type="text" id="restGuest" placeholder="Gezin">
+          <button class="btn btn-secondary btn-small" onclick="addRestGuest()">+ Voeg toe</button>
+        </div>
+        <div id="guestList" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 0.5rem;"></div>
+        <input type="hidden" id="restGuests" value="[]">
+      </div>
+      <button class="btn" onclick="saveRestaurant()">Opslaan</button>
+    </div>
+  `;
+  
+  let list = '<h3 style="margin: 2rem 0 1rem;">Restaurants & Wijncellars</h3>';
+  
+  if (appData.restaurants.length === 0) {
+    list += '<div class="card"><p style="color: #999;">Nog geen restaurants</p></div>';
+  } else {
+    const sorted = [...appData.restaurants].sort((a, b) => new Date(a.date) - new Date(b.date));
+    sorted.forEach((r, i) => {
+      list += `<div class="restaurant-card">
+        <div>
+          <div class="restaurant-title">${r.name}</div>
+          <div style="margin-top: 0.5rem;">
+            <span class="tag ${r.type}">${r.type === 'lunch' ? '🍽️ Lunch' : '🌙 Dinner'}</span>
+            <span class="tag">${r.date}</span>
+          </div>
+          <div class="restaurant-meta">📍 ${r.location}</div>
+          <button class="btn btn-secondary btn-small" style="margin-top: 1rem;" onclick="deleteRestaurant(${i})">Verwijderen</button>
+        </div>
+        <div>
+          <div style="font-weight: 600; margin-bottom: 0.75rem;">Gezelschap</div>
+          <div class="guest-list">${r.guests.map(g => `<span class="guest">${g}</span>`).join('')}</div>
+        </div>
+      </div>`;
+    });
+  }
+  
+  container.innerHTML = form + list;
+  document.getElementById('lunch-btn').style.borderColor = '#3b82f6';
+  document.getElementById('lunch-btn').style.background = '#dbeafe';
+}
+
+let restGuests = [];
+
+function selectMeal(type) {
+  document.getElementById('lunch-btn').style.borderColor = type === 'lunch' ? '#3b82f6' : '#ddd';
+  document.getElementById('lunch-btn').style.background = type === 'lunch' ? '#dbeafe' : 'white';
+  document.getElementById('dinner-btn').style.borderColor = type === 'dinner' ? '#3b82f6' : '#ddd';
+  document.getElementById('dinner-btn').style.background = type === 'dinner' ? '#dbeafe' : 'white';
+  document.getElementById('restType').value = type;
+}
+
+function addRestGuest() {
+  const input = document.getElementById('restGuest');
+  if (input.value.trim()) {
+    restGuests.push(input.value.trim());
+    renderRestGuestList();
+    input.value = '';
+  }
+}
+
+function renderRestGuestList() {
+  const list = document.getElementById('guestList');
+  list.innerHTML = restGuests.map((g, i) => `
+    <span class="guest">${g} <button style="background: none; border: none; color: white; cursor: pointer; margin-left: 4px;" onclick="restGuests.splice(${i}, 1); renderRestGuestList();">×</button></span>
+  `).join('');
+}
+
+function saveRestaurant() {
+  const name = document.getElementById('restName').value;
+  const type = document.getElementById('restType').value;
+  const date = document.getElementById('restDate').value;
+  const location = document.getElementById('restLocation').value;
+  
+  if (!name || !date || restGuests.length === 0) {
+    alert('Vul alles in!');
+    return;
+  }
+  
+  appData.restaurants.push({ name, type, date, location, guests: [...restGuests] });
+  saveData();
+  restGuests = [];
+  renderRestaurants();
+}
+
+function deleteRestaurant(i) {
+  appData.restaurants.splice(i, 1);
+  saveData();
+  renderRestaurants();
+}
+
+// PACKING
+function renderPacking() {
+  const container = document.getElementById('packing');
+  
+  let html = `<div class="card">
+    <h2 style="margin-bottom: 1.5rem; font-size: 20px;">Packing Lists</h2>
+    
+    <div class="form-group">
+      <label class="form-label">Selecteer gezin</label>
+      <div class="family-buttons">
+        ${Object.entries(families).map(([key, name]) => `
+          <button class="family-btn ${key === currentFamily ? 'active' : ''}" onclick="selectFamily('${key}')">
+            ${name}
+          </button>
+        `).join('')}
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label">Item toevoegen</label>
+      <div class="flex-row">
+        <input type="text" id="packingInput" placeholder="Wat neem je mee?" onkeypress="if(event.key==='Enter') addPackingItem()">
+        <button class="btn btn-small" onclick="addPackingItem()">+ Voeg toe</button>
+      </div>
+    </div>
+    
+    <h3 id="packingHeader" style="margin-top: 2rem; margin-bottom: 1rem; font-size: 16px;"></h3>
+    <div id="packingList"></div>
+  </div>`;
+  
+  container.innerHTML = html;
+  renderPackingItems();
+}
+
+function selectFamily(family) {
+  currentFamily = family;
+  renderPacking();
+}
+
+function addPackingItem() {
+  const input = document.getElementById('packingInput');
+  if (!input.value.trim()) return;
+  
+  appData.packing[currentFamily].push({
+    id: Date.now(),
+    text: input.value.trim(),
+    checked: false
+  });
+  saveData();
+  input.value = '';
+  renderPackingItems();
+}
+
+function togglePackingItem(id) {
+  const item = appData.packing[currentFamily].find(i => i.id === id);
+  if (item) item.checked = !item.checked;
+  saveData();
+  renderPackingItems();
+}
+
+function deletePackingItem(id) {
+  appData.packing[currentFamily] = appData.packing[currentFamily].filter(i => i.id !== id);
+  saveData();
+  renderPackingItems();
+}
+
+function renderPackingItems() {
+  const items = appData.packing[currentFamily] || [];
+  const checked = items.filter(i => i.checked).length;
+  const open = items.filter(i => !i.checked).length;
+  
+  document.getElementById('packingHeader').textContent = `${families[currentFamily]} (${open} open, ${checked} klaar)`;
+  
+  const list = document.getElementById('packingList');
+  if (items.length === 0) {
+    list.innerHTML = '<p style="color: #999;">Geen items</p>';
+    return;
+  }
+  
+  list.innerHTML = items.map(item => `
+    <div class="packing-item ${item.checked ? 'checked' : ''}">
+      <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="togglePackingItem(${item.id})">
+      <span class="packing-text">${item.text}</span>
+      <button class="packing-delete" onclick="deletePackingItem(${item.id})">×</button>
+    </div>
+  `).join('');
+}
+
+// NOTES
+function renderNotes() {
+  const container = document.getElementById('notes');
+  container.innerHTML = `
+    <div class="card">
+      <h2 style="margin-bottom: 1.5rem; font-size: 20px;">Algemene Notities</h2>
+      <textarea id="notesText" onchange="saveNotes()">${appData.notes}</textarea>
+    </div>
+  `;
+}
+
+function saveNotes() {
+  appData.notes = document.getElementById('notesText').value;
+  saveData();
+}
+
+// SYNC - Share Code
+function generateShareCode() {
+  const code = btoa(JSON.stringify(appData));
+  const shortCode = code.substring(0, 8) + '-' + code.substring(8, 16) + '-' + code.substring(16, 24) + '-' + code.substring(24, 32);
+  return shortCode;
+}
+
+function renderSync() {
+  const container = document.getElementById('sync');
+  const code = generateShareCode();
+  
+  container.innerHTML = `
+    <div class="card">
+      <h2 style="margin-bottom: 2rem; font-size: 20px;">🔄 Gegevens Synchronisatie</h2>
+      
+      <div style="background: #f0fdf4; border: 2px solid #10b981; border-radius: 12px; padding: 2rem; margin-bottom: 2rem; text-align: center;">
+        <h3 style="font-size: 16px; margin-bottom: 1rem; color: #065f46;">📤 Deel je gegevens</h3>
+        <p style="color: #047857; margin-bottom: 1.5rem; font-size: 14px;">Klik op de knop hieronder om een Share Code te genereren. Plak deze code in de WhatsApp groep.</p>
+        <button class="btn" onclick="copyToClipboard('${code}'); alert('Code gekopieerd! Plak in WhatsApp.')" style="margin-bottom: 1rem; width: 100%;">📋 Kopieer Share Code</button>
+        <div style="background: white; padding: 1rem; border-radius: 8px; font-family: monospace; word-break: break-all; font-size: 12px; color: #1f2937; border: 1px solid #d1d5db;">
+          ${code}
+        </div>
+      </div>
+      
+      <div style="background: #dbeafe; border: 2px solid #3b82f6; border-radius: 12px; padding: 2rem;">
+        <h3 style="font-size: 16px; margin-bottom: 1rem; color: #1e40af;">📥 Ontvang gegevens</h3>
+        <p style="color: #1e40af; margin-bottom: 1.5rem; font-size: 14px;">Iemand stuurt je een Share Code? Plak die hier in.</p>
+        <div style="display: flex; gap: 8px; margin-bottom: 1rem;">
+          <input type="text" id="importCode" placeholder="VAKANTIE-XXXX-XXXX-XXXX" style="flex: 1;">
+          <button class="btn" onclick="importShareCode()" style="padding: 10px 20px;">📥 Importeren</button>
+        </div>
+        <div id="importStatus" style="font-size: 13px; color: #666;"></div>
+      </div>
+    </div>
+    
+    <div class="card" style="margin-top: 2rem; background: #fef2f2; border: 1px solid #fecaca;">
+      <h3 style="margin-bottom: 1rem; color: #991b1b;">⚙️ Data Management</h3>
+      <button class="btn btn-secondary" onclick="downloadJSON()" style="margin-bottom: 0.5rem; width: 100%;">💾 Download als JSON (backup)</button>
+      <p style="font-size: 12px; color: #999; margin-top: 0.5rem;">Voor noodgevallen: bewaar een kopie van alle data</p>
+    </div>
+  `;
+}
+
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text);
+}
+
+function importShareCode() {
+  const code = document.getElementById('importCode').value.trim();
+  const status = document.getElementById('importStatus');
+  
+  if (!code) {
+    status.innerHTML = '❌ Plak een code!';
+    status.style.color = '#dc2626';
+    return;
+  }
+  
+  try {
+    // Remove hyphens
+    const cleanCode = code.replace(/-/g, '');
+    const decoded = JSON.parse(atob(cleanCode));
+    
+    // Validate structure
+    if (!decoded.restaurants || !decoded.packing || decoded.notes === undefined) {
+      throw new Error('Ongeldige code');
+    }
+    
+    // Ask for confirmation
+    if (confirm('Voeg deze gegevens toe aan jouw app?\n\n' + 
+                'Dit voegt toe:\n' +
+                '• ' + decoded.restaurants.length + ' restaurants\n' +
+                '• Packing lists\n' +
+                '• Notities\n\n' +
+                'Bestaande data blijft behouden.')) {
+      
+      // Merge data (don't overwrite, add to existing)
+      appData.restaurants = [...appData.restaurants, ...decoded.restaurants];
+      appData.notes = appData.notes + '\n\n--- Geïmporteerd ---\n' + decoded.notes;
+      
+      // Merge packing lists
+      Object.keys(decoded.packing).forEach(family => {
+        if (!appData.packing[family]) appData.packing[family] = [];
+        appData.packing[family] = [...appData.packing[family], ...decoded.packing[family]];
+      });
+      
+      saveData();
+      
+      status.innerHTML = '✅ Gegevens geïmporteerd! Herlaad de pagina.';
+      status.style.color = '#059669';
+      document.getElementById('importCode').value = '';
+      
+      setTimeout(() => {
+        location.reload();
+      }, 2000);
+    }
+  } catch (e) {
+    status.innerHTML = '❌ Ongeldige code. Controleer en probeer opnieuw.';
+    status.style.color = '#dc2626';
+  }
+}
+
+function downloadJSON() {
+  const dataStr = JSON.stringify(appData, null, 2);
+  const dataBlob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(dataBlob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'vakantie-planner-backup-' + new Date().toISOString().split('T')[0] + '.json';
+  link.click();
+}
+
+// Initialize
+loadData();
+renderDaily();
+</script>
+
+</body>
+</html>
